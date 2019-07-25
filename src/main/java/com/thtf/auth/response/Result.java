@@ -1,6 +1,8 @@
 package com.thtf.auth.response;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * ========================
@@ -11,8 +13,15 @@ import lombok.Data;
  * ========================
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Result<T> {
     private int code;
     private String msg;
     private T data;
+
+    public Result(int code, String msg) {
+        this.code = code;
+        this.msg = msg;
+    }
 }

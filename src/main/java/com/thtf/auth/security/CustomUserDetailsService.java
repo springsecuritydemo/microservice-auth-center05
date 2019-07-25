@@ -1,8 +1,8 @@
 package com.thtf.auth.security;
 
-import com.thtf.auth.model.SysRole;
-import com.thtf.auth.model.SysUser;
-import com.thtf.auth.model.SysUserRole;
+import com.thtf.auth.dao.SysPermissionMapper;
+import com.thtf.auth.dao.SysRolePermissionMapper;
+import com.thtf.auth.model.*;
 import com.thtf.auth.service.SysRoleService;
 import com.thtf.auth.service.SysUserRoleService;
 import com.thtf.auth.service.SysUserService;
@@ -39,6 +39,12 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     private SysUserRoleService userRoleService;
 
+    @Autowired
+    private SysRolePermissionMapper rolePermissionMapper;
+
+    @Autowired
+    private SysPermissionMapper permissionMapper;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
@@ -53,8 +59,15 @@ public class CustomUserDetailsService implements UserDetailsService {
         // 添加权限
         List<SysUserRole> userRoles = userRoleService.listByUserId(user.getId());
         for (SysUserRole userRole : userRoles) {
+
             SysRole role = roleService.selectById(userRole.getRoleId());
-            authorities.add(new SimpleGrantedAuthority(role.getName()));
+
+            List<SysRolePermission> rolePermissions = rolePermissionMapper.listByRoleId(role.getId());
+            for (SysRolePermission rolePermission : rolePermissions) {
+                SysPermission permission = permissionMapper.selectById(rolePermission.getPermissionId());
+
+                authorities.add(new SimpleGrantedAuthority(permission.getName()));
+            }
         }
 
         // 返回UserDetails实现类
